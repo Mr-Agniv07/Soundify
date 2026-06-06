@@ -22,7 +22,7 @@ There is **no build, no lint, no tests**. `live-server` auto-reloads the browser
 
 1. **`js/api.js`** → `Audius` — the API client. Picks a discovery host once (with hardcoded fallbacks), then exposes `trending({genre,time,limit})`, `search(query)`, `track(id)`, and `streamUrl(id)`. Every track is run through `normalize()` into the app's shape `{id,title,artist,artwork,artworkLarge,duration,genre,plays}`. **All other code depends on this normalized shape** — if you add a field, add it here.
 2. **`js/store.js`** → `Store` — localStorage persistence under key `soundify_v1` (`{liked, history, playlists}`). Stores **full normalized track objects** (not just ids) so views render without re-fetching. Exposes `onChange(fn)` for reactivity. Likes/history/playlists CRUD.
-3. **`js/player.js`** → `Player` — owns the single `<audio>` element, the queue, the bottom player bar, the now-playing panel, and the canvas visualizer. Drive it with `Player.playContext(tracks, startIndex)`. Internals: `queue` (track objects) + `order`/`orderPos` (a permutation for shuffle) + `repeatMode` (0/1/2). Streams by setting `audio.src = await Audius.streamUrl(id)`. Logs to `Store.addHistory` on play. Exposes `onChange(fn)`.
+3. **`js/player.js`** → `Player` — owns the single `<audio>` element, the queue, the bottom player bar, the now-playing panel, and the canvas visualizer. Drive it with `Player.playContext(tracks, startIndex)`. Internals: `queue` (track objects) + `order`/`orderPos` (a permutation for shuffle) + `repeatMode` (0/1/2). Streams by setting `audio.src = await Audius.streamUrl(id)`. Logs to `Store.addHistory` on play. Exposes `onChange(fn)`. The visualizer is a **synthetic** canvas animation — see the gotcha below.
 4. **`js/ui.js`** → `UI` — view router + renderers (Home, Search, Liked, History, Playlist) and reusable components (`trackRow`, `card`, `row`, `header`, add-to-playlist modal). `navigate(name, param)` swaps the `#view` contents. `syncPlaying()` updates only the active-row highlight without re-fetching.
 5. **`js/app.js`** — bootstrap. Wires sidebar nav, debounced top-bar search, modal, and the reactivity wiring: `Store.onChange → UI.refresh`, `Player.onChange → UI.syncPlaying`.
 
@@ -31,7 +31,7 @@ Two event buses: `Store.onChange` (data changed → re-render sidebar + data-bac
 
 ### Key gotchas
 - **Track ids are strings** (e.g. `"BqpPKMP"`), not the numeric `track_id`. Always use `.id`.
-- **Visualizer taint:** `createMediaElementSource` on cross-origin Audius streams yields all-zero analyser data. `player.js` detects this (zero-frame counter) and switches to a synthetic animation. Don't set `audio.crossOrigin` — it would break playback on CDNs without CORS headers.
+- **Visualizer / silent-audio trap (important):** do NOT reintroduce `createMediaElementSource` / an `AnalyserNode`. It reroutes `<audio>` output through the Web Audio graph, and Audius streams are cross-origin behind a 302 whose *redirect* response carries no CORS header — so the browser **silences** the rerouted audio (it appears to play but is silent). The visualizer is therefore a synthetic animation. Also don't set `audio.crossOrigin = "anonymous"` — the redirect would then fail CORS and break playback entirely.
 - **Search is debounced and sequence-guarded** (`searchSeq`) so a slow earlier request can't overwrite a newer one.
 - Adding/removing a feature usually means touching the relevant `js/` module **and** wiring it in `app.js` — there is no shared framework doing it for you.
 
