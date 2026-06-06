@@ -5,6 +5,18 @@
 (function init() {
     const $ = (id) => document.getElementById(id);
 
+    // Bulletproof mobile viewport height: lock the app to the *visible*
+    // height so the player bar is never hidden behind the browser's
+    // address/nav bar (older phones don't support CSS `dvh`).
+    function setAppHeight() {
+        const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+        document.body.style.height = h + "px";
+    }
+    setAppHeight();
+    window.addEventListener("resize", setAppHeight);
+    window.addEventListener("orientationchange", setAppHeight);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", setAppHeight);
+
     // ---- Sidebar nav ----
     $("nav-home").addEventListener("click", () => UI.navigate("home"));
     $("nav-search").addEventListener("click", () => { UI.navigate("search"); $("search").focus(); });
