@@ -1,0 +1,20 @@
+{
+  "name": "soundify",
+  "version": "1.0.0",
+  "description": "A lightweight, dependency-free music player built with vanilla HTML, CSS, and JavaScript.",
+  "scripts": {
+    "start": "live-server --port=8000 --no-browser",
+    "dev": "live-server --port=8000"
+  },
+  "keywords": [
+    "music",
+    "player",
+    "vanilla-js",
+    "web-audio"
+  ],
+  "author": "Mr-Agniv07",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
