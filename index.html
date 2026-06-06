@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soundify — Your Music, Reimagined</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- ===== Top bar ===== -->
+    <nav>
+        <div class="brand">
+            <img src="logo.jpg" alt="Soundify logo">
+            <span>Soundify</span>
+        </div>
+
+        <div class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search" placeholder="Search songs or artists…" autocomplete="off">
+            <button id="search-clear" class="search-clear" title="Clear" aria-label="Clear search">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="nav-links">
+            <a href="#" class="active">Home</a>
+            <a href="#">About</a>
+        </div>
+    </nav>
+
+    <!-- ===== Main content ===== -->
+    <main class="container">
+        <!-- Library -->
+        <section class="library">
+            <div class="section-head">
+                <h2>Your Library</h2>
+                <span id="song-count" class="count"></span>
+            </div>
+            <div id="songlist" class="songlist"><!-- rendered by script.js --></div>
+            <p id="empty-state" class="empty-state" hidden>No songs match your search.</p>
+        </section>
+
+        <!-- Now playing + queue -->
+        <aside class="now-playing">
+            <div class="art-wrap">
+                <img id="np-cover" src="maxresdefault.jpg" alt="Album art">
+                <canvas id="visualizer"></canvas>
+            </div>
+            <div class="np-meta">
+                <h3 id="np-title">Brooklyn Baby</h3>
+                <p id="np-artist">Lana Del Rey</p>
+            </div>
+
+            <div class="queue">
+                <div class="section-head">
+                    <h2>Up Next</h2>
+                </div>
+                <div id="queue-list" class="queue-list"><!-- rendered by script.js --></div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- ===== Player bar ===== -->
+    <footer class="player">
+        <div class="player-track">
+            <img id="bar-cover" src="maxresdefault.jpg" alt="">
+            <div class="player-track-text">
+                <span id="bar-title">Brooklyn Baby</span>
+                <span id="bar-artist">Lana Del Rey</span>
+            </div>
+        </div>
+
+        <div class="player-center">
+            <div class="controls">
+                <button id="shuffle" class="ctrl ghost" title="Shuffle">
+                    <i class="fa-solid fa-shuffle"></i>
+                </button>
+                <button id="previous" class="ctrl" title="Previous">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+                <button id="masterplay" class="ctrl play" title="Play / Pause">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <button id="next" class="ctrl" title="Next">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+                <button id="repeat" class="ctrl ghost" title="Repeat">
+                    <i class="fa-solid fa-repeat"></i>
+                </button>
+            </div>
+            <div class="progress-row">
+                <span id="cur-time" class="time">0:00</span>
+                <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
+                <span id="dur-time" class="time">0:00</span>
+            </div>
+        </div>
+
+        <div class="player-right">
+            <button id="mute" class="ctrl ghost" title="Mute">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <input type="range" id="volume" min="0" max="100" value="100">
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
