@@ -3,92 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soundify — Your Music, Reimagined</title>
+    <title>Soundify — Stream Music Free</title>
+    <meta name="description" content="Soundify — a free music streaming app powered by Audius. Search, browse, and build playlists.">
+    <link rel="icon" href="logo.jpg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <!-- ===== Top bar ===== -->
-    <nav>
-        <div class="brand">
-            <img src="logo.jpg" alt="Soundify logo">
-            <span>Soundify</span>
-        </div>
-
-        <div class="search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search" placeholder="Search songs or artists…" autocomplete="off">
-            <button id="search-clear" class="search-clear" title="Clear" aria-label="Clear search">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="nav-links">
-            <a href="#" class="active">Home</a>
-            <a href="#">About</a>
-        </div>
-    </nav>
-
-    <!-- ===== Main content ===== -->
-    <main class="container">
-        <!-- Library -->
-        <section class="library">
-            <div class="section-head">
-                <h2>Your Library</h2>
-                <span id="song-count" class="count"></span>
+    <div class="app">
+        <!-- ===== Sidebar ===== -->
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="logo.jpg" alt="">
+                <span>Soundify</span>
             </div>
-            <div id="songlist" class="songlist"><!-- rendered by script.js --></div>
-            <p id="empty-state" class="empty-state" hidden>No songs match your search.</p>
-        </section>
 
-        <!-- Now playing + queue -->
-        <aside class="now-playing">
+            <nav class="side-nav">
+                <button id="nav-home" class="side-link"><i class="fa-solid fa-house"></i> <span>Home</span></button>
+                <button id="nav-search" class="side-link"><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span></button>
+                <button id="nav-liked" class="side-link"><i class="fa-solid fa-heart"></i> <span>Liked Songs</span></button>
+                <button id="nav-history" class="side-link"><i class="fa-solid fa-clock-rotate-left"></i> <span>Recently Played</span></button>
+            </nav>
+
+            <div class="library-head">
+                <span><i class="fa-solid fa-list"></i> Your Playlists</span>
+                <button id="btn-create-playlist" title="New playlist"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div id="playlist-list" class="playlist-list"><!-- rendered by ui.js --></div>
+
+            <div class="side-foot">Powered by <a href="https://audius.org" target="_blank" rel="noopener">Audius</a></div>
+        </aside>
+
+        <!-- ===== Main ===== -->
+        <main class="main">
+            <header class="topbar">
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search" placeholder="What do you want to listen to?" autocomplete="off">
+                    <button id="search-clear" class="search-clear" aria-label="Clear"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <button id="np-toggle" class="np-toggle" title="Now playing"><i class="fa-solid fa-compact-disc"></i></button>
+            </header>
+            <div id="view" class="view"><!-- rendered by ui.js --></div>
+        </main>
+
+        <!-- ===== Now playing / queue panel ===== -->
+        <aside class="now-panel">
             <div class="art-wrap">
-                <img id="np-cover" src="maxresdefault.jpg" alt="Album art">
+                <img id="np-cover" src="logo.jpg" alt="Album art">
                 <canvas id="visualizer"></canvas>
             </div>
             <div class="np-meta">
-                <h3 id="np-title">Brooklyn Baby</h3>
-                <p id="np-artist">Lana Del Rey</p>
+                <h3 id="np-title">Nothing playing</h3>
+                <p id="np-artist">Pick a song to start</p>
             </div>
-
             <div class="queue">
-                <div class="section-head">
-                    <h2>Up Next</h2>
-                </div>
-                <div id="queue-list" class="queue-list"><!-- rendered by script.js --></div>
+                <div class="section-head"><h2>Up Next</h2></div>
+                <div id="queue-list" class="queue-list"></div>
             </div>
         </aside>
-    </main>
+    </div>
 
     <!-- ===== Player bar ===== -->
     <footer class="player">
         <div class="player-track">
-            <img id="bar-cover" src="maxresdefault.jpg" alt="">
+            <img id="bar-cover" src="logo.jpg" alt="">
             <div class="player-track-text">
-                <span id="bar-title">Brooklyn Baby</span>
-                <span id="bar-artist">Lana Del Rey</span>
+                <span id="bar-title">—</span>
+                <span id="bar-artist"></span>
             </div>
+            <button id="bar-like" class="ctrl ghost" title="Like"><i class="fa-regular fa-heart"></i></button>
         </div>
 
         <div class="player-center">
             <div class="controls">
-                <button id="shuffle" class="ctrl ghost" title="Shuffle">
-                    <i class="fa-solid fa-shuffle"></i>
-                </button>
-                <button id="previous" class="ctrl" title="Previous">
-                    <i class="fa-solid fa-backward-step"></i>
-                </button>
-                <button id="masterplay" class="ctrl play" title="Play / Pause">
-                    <i class="fa-solid fa-play"></i>
-                </button>
-                <button id="next" class="ctrl" title="Next">
-                    <i class="fa-solid fa-forward-step"></i>
-                </button>
-                <button id="repeat" class="ctrl ghost" title="Repeat">
-                    <i class="fa-solid fa-repeat"></i>
-                </button>
+                <button id="shuffle" class="ctrl ghost" title="Shuffle"><i class="fa-solid fa-shuffle"></i></button>
+                <button id="previous" class="ctrl" title="Previous"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="masterplay" class="ctrl play" title="Play / Pause"><i class="fa-solid fa-play"></i></button>
+                <button id="next" class="ctrl" title="Next"><i class="fa-solid fa-forward-step"></i></button>
+                <button id="repeat" class="ctrl ghost" title="Repeat"><i class="fa-solid fa-repeat"></i></button>
             </div>
             <div class="progress-row">
                 <span id="cur-time" class="time">0:00</span>
@@ -98,13 +92,24 @@
         </div>
 
         <div class="player-right">
-            <button id="mute" class="ctrl ghost" title="Mute">
-                <i class="fa-solid fa-volume-high"></i>
-            </button>
+            <button id="mute" class="ctrl ghost" title="Mute"><i class="fa-solid fa-volume-high"></i></button>
             <input type="range" id="volume" min="0" max="100" value="100">
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- ===== Add-to-playlist modal ===== -->
+    <div id="modal" class="modal">
+        <div class="modal-box">
+            <button class="modal-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- scripts: order matters (classic scripts share global scope) -->
+    <script src="js/api.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

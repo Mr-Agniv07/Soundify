@@ -1,6 +1,20 @@
 # Dependencies
 node_modules/
 
+# Local media — the app now streams from Audius, so these sample files
+# are no longer part of the app. Kept on disk but out of the repo.
+*.mp3
+music.gif
+Gemini_Generated_Image_rpk5b1rpk5b1rpk5.png
+Spotify-Logo-PNG-HD.png
+unnamed.jpg
+maxresdefault.jpg
+artworks-3XBv1zcHsuRJQQhN-OeFTYg-t1080x1080.jpg
+94bedb8101c42ae24bef814cf3434667.jpg
+
+# Editor / tooling (machine-specific paths)
+.claude/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

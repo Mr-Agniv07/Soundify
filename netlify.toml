@@ -1,0 +1,5 @@
+# Soundify is a static site with no build step. These settings stop Netlify
+# from trying to run a build just because a package.json is present.
+[build]
+  publish = "."
+  command = ""

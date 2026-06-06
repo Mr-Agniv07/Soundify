@@ -1,51 +1,51 @@
 # 🎵 Soundify
 
-A lightweight, dependency-free music player built with **vanilla HTML, CSS, and JavaScript** — no build step, no framework, no bundler.
+A free music streaming web app built with **vanilla HTML, CSS, and JavaScript** — no framework, no build step, no bundler. Music streams from the [**Audius**](https://audius.org) public API (full-length free tracks, no API key, no login), and your library is saved locally in the browser.
 
-## Features
+## ✨ Features
 
-- 🎚️ **Full playback controls** — play/pause, next, previous (with smart "restart vs. previous" behaviour)
-- 🔀 **Shuffle** (Fisher–Yates order) and 🔁 **Repeat** (off / all / one)
-- 📜 **Up Next queue** that reflects the current playback order
-- 🔍 **Live search** across song titles and artists
-- 📊 **Audio visualizer** powered by the Web Audio API (with a graceful fallback)
-- 🔊 **Volume + mute** and a seekable progress bar with timestamps
-- ⌨️ **Keyboard shortcuts** — `Space` play/pause, `←` / `→` previous/next
-- 📱 **Responsive** layout that collapses to a single column on small screens
+- 🔎 **Search** millions of real tracks with artwork
+- 🏠 **Browse** a Home feed of Trending + per-genre rows (Electronic, Hip-Hop/Rap, Pop, Rock, Lo-Fi)
+- ▶️ **Full playback** — full-length songs, not 30-second previews
+- 📋 **Playlists** — create, rename, delete, add/remove songs
+- ❤️ **Liked Songs** and 🕒 **Recently Played** history
+- 🔀 Shuffle · 🔁 Repeat (off / all / one) · 📜 Up-Next queue
+- 📊 **Audio visualizer** (Web Audio API, with a graceful fallback)
+- ⌨️ Keyboard shortcuts — `Space` play/pause, `←` / `→` previous/next
+- 💾 Everything saved to **localStorage** — no account needed
+- 📱 Responsive layout
 
-## Run it
-
-No install required — just open `index.html` in any modern browser.
+## 🚀 Run locally
 
 ```bash
-# or serve it locally for the visualizer to work reliably
-python -m http.server 8000
-# then visit http://localhost:8000
+npm install   # one-time (installs live-server for dev)
+npm start     # → http://localhost:8000
 ```
 
-> The Web Audio visualizer is most reliable when the page is served over `http://`
-> rather than opened directly via `file://`; a synthetic animation kicks in as a fallback.
+`npm run dev` does the same and opens your browser. Edit a file, save, and it auto-reloads.
 
-## Adding a song
+> You can also just open `index.html`, but serving over `http://` is recommended so the Web Audio visualizer works (a synthetic animation kicks in otherwise).
 
-Drop the `.mp3` and a cover image into the project folder, then add one entry to the
-`songs[]` array in `script.js`:
+## 🌐 Deploy
 
-```js
-{
-    songName: "Song Title",
-    artist:   "Artist Name",
-    filePath: "my-song.mp3",
-    coverPath: "my-cover.jpg",
-}
-```
+It's a static site — deploy anywhere:
 
-The library list, queue, and search all derive from that array automatically.
+- **Netlify** — drag the folder onto [app.netlify.com/drop](https://app.netlify.com/drop), or connect the repo (the included `netlify.toml` sets the right config automatically).
+- **GitHub Pages** — Settings → Pages → deploy from `main` / root (the included `.nojekyll` makes Pages serve the `js/` folder correctly).
+- **Vercel / Cloudflare Pages** — import the repo, no build command, output directory `.`.
 
-## Project structure
+## 🗂️ Structure
 
-| File         | Role                                                        |
-| ------------ | ----------------------------------------------------------- |
-| `index.html` | Static shell — nav, library/now-playing grid, player bar    |
-| `script.js`  | All playback logic, rendering, search, and the visualizer   |
-| `style.css`  | Dark theme (CSS variables) + responsive layout              |
+| Path           | Role                                                          |
+| -------------- | ------------------------------------------------------------ |
+| `index.html`   | Static shell (sidebar · views · now-playing · player · modal) |
+| `js/api.js`    | Audius API client (search, trending, stream URLs)            |
+| `js/store.js`  | localStorage persistence (likes, playlists, history)         |
+| `js/player.js` | Audio engine, queue, player bar, visualizer                  |
+| `js/ui.js`     | View router + renderers + components                         |
+| `js/app.js`    | Bootstrap & event wiring                                     |
+| `style.css`    | Dark theme (CSS variables) + responsive layout              |
+
+## 🙏 Credits
+
+Music streaming powered by the [Audius](https://audius.org) protocol and its independent artists.

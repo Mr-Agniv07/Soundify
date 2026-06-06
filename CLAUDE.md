@@ -4,26 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Soundify — a static, single-page music player. No build step, no framework, no package manager. Open `index.html` directly in a browser to run it.
+Soundify — a free music streaming web app. Vanilla HTML/CSS/JS, **no build step, no framework, no bundler**. Music comes from the **Audius public API** (full free tracks, no API key, no login). All user data (likes, playlists, history) lives in **localStorage**. The whole thing is a static site — deployable to any static host.
+
+## Commands
+
+```bash
+npm install     # one-time: installs live-server (dev only)
+npm start       # serve at http://localhost:8000 (no auto-open)
+npm run dev     # same, but opens the browser
+```
+
+There is **no build, no lint, no tests**. `live-server` auto-reloads the browser on save. You can also just open `index.html` directly, but serving over `http://` is preferred (the visualizer's Web Audio path needs it; otherwise a synthetic fallback runs).
 
 ## Architecture
 
-All logic is in three files:
+`index.html` is a static shell (sidebar · main view · now-playing panel · player bar · modal). Everything else is in `js/`, loaded as **classic scripts in dependency order** (they share global scope — no ES modules, so later files can call earlier ones):
 
-- `index.html` — static shell only: top nav (brand + search), a main grid (library + now-playing/queue), and a fixed bottom player bar. The library list and queue are rendered by JS, not hardcoded.
-- `script.js` — all runtime behaviour. The `songs[]` array (each entry: `songName`, `artist`, `filePath`, `coverPath`) is the single source of truth. A single reused `Audio` element drives playback.
-- `style.css` — dark theme via CSS custom properties in `:root`; responsive grid collapses to one column under 880px.
+1. **`js/api.js`** → `Audius` — the API client. Picks a discovery host once (with hardcoded fallbacks), then exposes `trending({genre,time,limit})`, `search(query)`, `track(id)`, and `streamUrl(id)`. Every track is run through `normalize()` into the app's shape `{id,title,artist,artwork,artworkLarge,duration,genre,plays}`. **All other code depends on this normalized shape** — if you add a field, add it here.
+2. **`js/store.js`** → `Store` — localStorage persistence under key `soundify_v1` (`{liked, history, playlists}`). Stores **full normalized track objects** (not just ids) so views render without re-fetching. Exposes `onChange(fn)` for reactivity. Likes/history/playlists CRUD.
+3. **`js/player.js`** → `Player` — owns the single `<audio>` element, the queue, the bottom player bar, the now-playing panel, and the canvas visualizer. Drive it with `Player.playContext(tracks, startIndex)`. Internals: `queue` (track objects) + `order`/`orderPos` (a permutation for shuffle) + `repeatMode` (0/1/2). Streams by setting `audio.src = await Audius.streamUrl(id)`. Logs to `Store.addHistory` on play. Exposes `onChange(fn)`.
+4. **`js/ui.js`** → `UI` — view router + renderers (Home, Search, Liked, History, Playlist) and reusable components (`trackRow`, `card`, `row`, `header`, add-to-playlist modal). `navigate(name, param)` swaps the `#view` contents. `syncPlaying()` updates only the active-row highlight without re-fetching.
+5. **`js/app.js`** — bootstrap. Wires sidebar nav, debounced top-bar search, modal, and the reactivity wiring: `Store.onChange → UI.refresh`, `Player.onChange → UI.syncPlaying`.
 
-### Key concepts in `script.js`
+### Reactivity model
+Two event buses: `Store.onChange` (data changed → re-render sidebar + data-backed views) and `Player.onChange` (playback changed → update row highlights, refresh Liked/History). Never mutate the DOM for these by hand — call the renderers.
 
-- **State:** `currentIndex`, `isShuffle`, `repeatMode` (0 off / 1 all / 2 one), `shuffleOrder` (Fisher–Yates, current track first), and `filtered` (indices currently shown after a search).
-- **`playbackOrder()`** returns the index sequence for next/prev/queue — either natural order or `shuffleOrder`. `next()`/`prev()` wrap around it; `prev()` restarts the current track if >3s elapsed.
-- **Rendering is data-driven:** `renderLibrary()` rebuilds the list from `filtered`; `renderQueue()` shows upcoming tracks; `syncActiveRow()` highlights the playing row. Re-call these after any state change rather than mutating DOM by hand.
-- **Search** (`applySearch`) filters `songs` by name/artist into `filtered`, then re-renders.
-- **Visualizer:** Web Audio API `AnalyserNode` → canvas bars. `createMediaElementSource` can throw on tainted `file://` audio in some browsers, so there's a synthetic time-based fallback when `analyser` is null. Don't assume the analyser path always runs.
-- **Icons:** Font Awesome 6 via CDN `<link>`. Play/pause toggles by swapping `fa-play` / `fa-pause` on the button's `<i>`.
+### Key gotchas
+- **Track ids are strings** (e.g. `"BqpPKMP"`), not the numeric `track_id`. Always use `.id`.
+- **Visualizer taint:** `createMediaElementSource` on cross-origin Audius streams yields all-zero analyser data. `player.js` detects this (zero-frame counter) and switches to a synthetic animation. Don't set `audio.crossOrigin` — it would break playback on CDNs without CORS headers.
+- **Search is debounced and sequence-guarded** (`searchSeq`) so a slow earlier request can't overwrite a newer one.
+- Adding/removing a feature usually means touching the relevant `js/` module **and** wiring it in `app.js` — there is no shared framework doing it for you.
 
-## Adding a song
+## Deployment
 
-1. Drop the `.mp3` and cover image into the project directory.
-2. Add one entry to the `songs[]` array in `script.js`. That's it — the library row, queue, and search all derive from the array automatically.
+Pure static. `netlify.toml` sets `publish = "."` and an empty build command (so Netlify doesn't try to run a non-existent build because of `package.json`). `.nojekyll` lets GitHub Pages serve the `js/` folder untouched. `node_modules/` and the old sample `.mp3`/image files are gitignored (the app streams everything now).
