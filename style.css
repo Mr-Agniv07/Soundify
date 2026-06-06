@@ -22,7 +22,8 @@ body {
     font-family: 'Ubuntu', sans-serif;
     background: var(--bg);
     color: var(--text);
-    height: 100vh;
+    height: 100vh;          /* fallback */
+    height: 100dvh;         /* dynamic viewport — excludes mobile browser bars */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -356,13 +357,17 @@ input[type="range"]::-moz-range-thumb { height: 13px; width: 13px; border: none;
     .view-header h1 { font-size: 30px; }
     .player {
         display: flex; flex-direction: column; align-items: center;
-        justify-content: center; gap: 6px; height: auto; padding: 8px 14px;
+        justify-content: center; gap: 8px; height: auto;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
     }
     .player-track { width: 100%; }
     .player-track img { height: 44px; width: 44px; }
-    .player-center { width: 100%; gap: 4px; }
+    .player-center { width: 100%; gap: 6px; }
     .player-right { display: none; }
     .progress-row { max-width: none; }
+    /* make the primary control unmistakable on mobile */
+    .ctrl.play { width: 48px; height: 48px; font-size: 18px; }
+    .controls { gap: 22px; }
     .t-genre { display: none; }
     .track { grid-template-columns: 24px 40px 1fr 32px 32px 44px; }
 }
