@@ -254,28 +254,16 @@ const Player = (() => {
     });
 
     // ============================================================
-    //  Visualizer (Web Audio API → canvas, with taint fallback)
+    //  Visualizer (synthetic, canvas)
+    //  NOTE: we deliberately do NOT use Web Audio's AnalyserNode.
+    //  createMediaElementSource() reroutes playback through the audio
+    //  graph, and Audius streams are served cross-origin behind a 302
+    //  redirect whose redirect response carries no CORS header — so the
+    //  browser silences the rerouted output. Playing the <audio> element
+    //  directly guarantees sound; the bars below are animation-driven.
     // ============================================================
     const canvas = els.canvas, cx = canvas.getContext("2d");
-    let actx, analyser, dataArray, rafId, graphReady = false;
-    let useFallback = false, zeroFrames = 0;
-
-    function setupGraph() {
-        if (graphReady) return;
-        try {
-            actx = new (window.AudioContext || window.webkitAudioContext)();
-            const src = actx.createMediaElementSource(audio);
-            analyser = actx.createAnalyser();
-            analyser.fftSize = 128;
-            src.connect(analyser);
-            analyser.connect(actx.destination);
-            dataArray = new Uint8Array(analyser.frequencyBinCount);
-        } catch {
-            analyser = null;      // cross-origin/tainted → synthetic bars
-            useFallback = true;
-        }
-        graphReady = true;
-    }
+    let rafId = null;
 
     function resize() {
         canvas.width = canvas.clientWidth * devicePixelRatio;
@@ -289,36 +277,22 @@ const Player = (() => {
         cx.clearRect(0, 0, w, h);
         if (audio.paused) return;
 
-        let values;
-        if (analyser && !useFallback) {
-            analyser.getByteFrequencyData(dataArray);
-            const sum = dataArray.reduce((a, b) => a + b, 0);
-            if (sum === 0) { if (++zeroFrames > 30) useFallback = true; }
-            else zeroFrames = 0;
-            values = dataArray;
-        }
-        if (!analyser || useFallback) {
-            const n = 32;
-            values = Array.from({ length: n }, (_, i) =>
-                70 + 80 * Math.abs(Math.sin(Date.now() / 220 + i * 0.5)));
-        }
-
-        const bars = values.length;
-        const gap = 2 * devicePixelRatio;
-        const bw = (w - gap * (bars - 1)) / bars;
+        const n = 40, t = Date.now() / 1000;
         const grad = cx.createLinearGradient(0, h, 0, 0);
         grad.addColorStop(0, "rgba(29,185,84,.95)");
         grad.addColorStop(1, "rgba(139,92,246,.95)");
         cx.fillStyle = grad;
-        for (let i = 0; i < bars; i++) {
-            const bh = Math.max(2, (values[i] / 255) * h);
+        const gap = 2 * devicePixelRatio;
+        const bw = (w - gap * (n - 1)) / n;
+        for (let i = 0; i < n; i++) {
+            const v = 0.18 + 0.82 * Math.abs(
+                Math.sin(t * 3 + i * 0.55) * Math.cos(t * 1.7 + i * 0.27));
+            const bh = Math.max(2, v * h);
             cx.fillRect(i * (bw + gap), h - bh, bw, bh);
         }
     }
 
     function startVisualizer() {
-        setupGraph();
-        if (actx && actx.state === "suspended") actx.resume();
         resize();
         if (!rafId) draw();
     }
